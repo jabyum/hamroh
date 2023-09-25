@@ -7,15 +7,31 @@ bot = telebot.TeleBot("6269391112:AAFlxxKYVCaFS6l2BS26nmMATi3bSCoQ1hg")
 @bot.message_handler(commands=["start"])
 def start_message(message):
     user_id = message.from_user.id
-    mm = bot.send_message(user_id, "Главное меню", reply_markup=types.ReplyKeyboardRemove())
-    bot.delete_message(user_id, mm.message_id)
-    check_nurse = hamrohdatabase.check_nurse(user_id)
-    bot.send_message(user_id, "Выберите действие",
-                     reply_markup=hamrohbuttons.main_menu_kb(check_nurse))
+    language = hamrohdatabase.check_language(user_id)
+    if language == False:
+        bot.send_message(user_id, "Выберите язык / Tilni tanlang", reply_markup=hamrohbuttons.language_kb())
+        bot.register_next_step_handler(message, register_user)
+    elif language == "rus":
+        mm = bot.send_message(user_id, "Главное меню", reply_markup=types.ReplyKeyboardRemove())
+        bot.delete_message(user_id, mm.message_id)
+        check_nurse = hamrohdatabase.check_nurse(user_id)
+        bot.send_message(user_id, "Выберите действие",
+                        reply_markup=hamrohbuttons.main_menu_kb(check_nurse))
+    elif language == "uzb":
+        mm = bot.send_message(user_id, "Бош меню", reply_markup=types.ReplyKeyboardRemove())
+        bot.delete_message(user_id, mm.message_id)
+        check_nurse = hamrohdatabase.check_nurse(user_id)
+        bot.send_message(user_id, "Ҳаракатни танланг",
+                         reply_markup=hamrohbuttons.main_menu_kb_uz(check_nurse))
 @bot.callback_query_handler(lambda call: call.data in ["about", "main menu", "registration", "question",
                                                        "vacancy", "vac_base", "take_vacancy", "yes_delete",
                                                        "no_delete", "delete_registration", "delete_vacancy",
-                                                       "yes_delete_vac", "no_delete_vac", "nurse_base"])
+                                                       "yes_delete_vac", "no_delete_vac", "nurse_base",
+                                                       "about_uz", "main menu_uz", "registration_uz", "question_uz",
+                                                       "vacancy_uz", "vac_base_uz", "take_vacancy_uz", "yes_delete_uz",
+                                                       "no_delete_uz", "delete_registration_uz", "delete_vacancy_uz",
+                                                       "yes_delete_vac_uz", "no_delete_vac_uz", "nurse_base_uz",
+                                                       "change_language"])
 def calling(call):
     user_id = call.message.chat.id
     if call.data == "about":
@@ -95,7 +111,7 @@ def calling(call):
     elif call.data == "vac_base":
         bot.delete_message(user_id, call.message.message_id)
         bot.send_message(user_id, "Канал с актуальными вакансиями\n"
-                                  "https://t.me/+lyN7cNoZ40VmZDVi",
+                                  "https://t.me/+_iYh4_uI7YhiNjJi",
                          reply_markup=hamrohbuttons.main_menu_call_kb())
     elif call.data == "nurse_base":
         bot.delete_message(user_id, call.message.message_id)
@@ -109,6 +125,138 @@ def calling(call):
                                   "анкету придется заполнять заново",
                          reply_markup=hamrohbuttons.vac_gender_kb())
         bot.register_next_step_handler(call.message, get_vac_gender)
+    elif call.data == "about_uz":
+        bot.delete_message(user_id, call.message.message_id)
+        bot.send_message(user_id, "Ассалому алейкум!\n\nHAMROH га мурожаат қилганингиздан хунсандмиз.\n\n"
+                                  "Тошкент шахрида ногиронлиги мавжуд одамларга профессионал парвариш хизматини таъминлаймиз.\n\n"
+                                  "Бизнинг ташкилот ва хизматлар тўғрисида hamroh.org сайтидан янада батафсил маълумотни топишингиз мумкин\n\n"
+                                  "Ушбу бот уй кўмакчиси ва мижоз ўртасида боғланишни таъминлайди.",
+                         reply_markup=hamrohbuttons.main_menu_call_kb_uz())
+    elif call.data == "main menu_uz":
+        bot.delete_message(user_id, call.message.message_id)
+        return start_message(call)
+    elif call.data == "delete_registration_uz":
+        bot.send_message(user_id, "Анкетангизни ўчиришни аниқ хоҳлайсизми?",
+                         reply_markup=hamrohbuttons.delete_registration_kb_uz())
+    elif call.data == "no_delete_uz":
+        bot.delete_message(user_id, call.message.message_id)
+        return start_message(call)
+    elif call.data == "yes_delete_uz":
+        try:
+            bot.delete_message(user_id, call.message.message_id)
+            nurse_message_id = hamrohdatabase.get_nurse_message_id(user_id)
+            hamrohdatabase.delete_exact_nurse(user_id)
+            bot.send_message(user_id, "Сизнинг анкетангиз ўчирилди")
+            start_message(call)
+            try:
+                bot.delete_message(-1001905443362, nurse_message_id)
+            except:
+                pass
+        except:
+            bot.delete_message(user_id, call.message.message_id)
+            bot.send_message(user_id, "Хато юз берди. Қўллаб-қувватлаш хизматига мурожаат қилиш")
+            return start_message(call)
+    elif call.data == "delete_vacancy_uz":
+        bot.delete_message(user_id, call.message.message_id)
+        bot.send_message(user_id, "Вакансияни ўчиришни аниқ хоғлайсизми?",
+                         reply_markup=hamrohbuttons.delete_vacancy_kb_uz())
+    elif call.data == "registration_uz":
+        bot.delete_message(user_id, call.message.message_id)
+        bot.send_message(user_id, "Кўмакчилар базасида ўз анкетангизни қолдириш учун қуйидаги саволларга жавоб беринг.\n\n"
+                                  "Ўз исм ва фамилиянгизни ёзинг.\n\n"
+                                  "Тўлдириш жараёнида 'Бош меню' тугмасини боссангиз анкетани қайтадан тўлдиришга тўғри келади",
+                         reply_markup=hamrohbuttons.main_menu_reply_kb_uz())
+        bot.register_next_step_handler(call.message, get_nurse_name_uz)
+
+    elif call.data == "question_uz":
+        bot.delete_message(user_id, call.message.message_id)
+        bot.send_message(user_id, "Саволингизни ёзинг",
+                         reply_markup=hamrohbuttons.main_menu_reply_kb_uz())
+        bot.register_next_step_handler(call.message, take_question_uz)
+    elif call.data == "vacancy_uz":
+        bot.delete_message(user_id, call.message.message_id)
+        check_vac = hamrohdatabase.check_vac(user_id)
+        bot.send_message(user_id, "Кўмакчилар базасида мавжуд кўмакчини танлашингиз мумкин ёки сўровингиз очиқ қолдиришингиз мумкин",
+                         reply_markup=hamrohbuttons.vac_format_kb_uz(check_vac))
+    elif call.data == "no_delete_vac_uz":
+        bot.delete_message(user_id, call.message.message_id)
+        return start_message(call)
+    elif call.data == "yes_delete_vac_uz":
+        try:
+            bot.delete_message(user_id, call.message.message_id)
+            vac_message_id = hamrohdatabase.get_vacancy_message_id(user_id)
+            hamrohdatabase.delete_exact_vacancie(user_id)
+            bot.send_message(user_id, "Вакансиянгиз ўчирилди")
+            start_message(call)
+            try:
+                bot.delete_message(-1001925064725, vac_message_id)
+            except:
+                pass
+        except:
+            bot.delete_message(user_id, call.message.message_id)
+            bot.send_message(user_id, "Хато юз берди. Қўллаб-қувватлаш хизматига мурожаат қилиш")
+            return start_message(call)
+    elif call.data == "vac_base_uz":
+        bot.delete_message(user_id, call.message.message_id)
+        bot.send_message(user_id, "Жорий вакансиялар канали\n"
+                                  "https://t.me/+lyN7cNoZ40VmZDVi",
+                         reply_markup=hamrohbuttons.main_menu_call_kb_uz())
+    elif call.data == "nurse_base_uz":
+        bot.delete_message(user_id, call.message.message_id)
+        bot.send_message(user_id, "Энагалар анкеталари канали\n"
+                                  "https://t.me/+8BN_TP1AX8Y4ZjIy",
+                         reply_markup=hamrohbuttons.main_menu_call_kb_uz())
+    elif call.data == "take_vacancy_uz":
+        bot.delete_message(user_id, call.message.message_id)
+        bot.send_message(user_id,"Тегишли вариантни танланг. Кўмакчи ким учун керак?\n"
+                                 "Тўлдириш жараёнида 'Бош меню' тугмасини боссангиз анкетани қайтадан тўлдиришга тўғри келади",
+                         reply_markup=hamrohbuttons.vac_gender_kb_uz())
+        bot.register_next_step_handler(call.message, get_vac_gender_uz)
+    elif call.data == "change_language":
+        bot.delete_message(user_id, call.message.message_id)
+        bot.send_message(user_id, "Выберите язык / Tilni tanlang", reply_markup=hamrohbuttons.language_kb())
+        bot.register_next_step_handler(call.message, change_language)
+
+def change_language(message):
+    user_id = message.from_user.id
+    if message.text == "Русский язык":
+        hamrohdatabase.change_language("rus", user_id)
+        mm = bot.send_message(user_id, "Главное меню", reply_markup=types.ReplyKeyboardRemove())
+        bot.delete_message(user_id, mm.message_id)
+        check_nurse = hamrohdatabase.check_nurse(user_id)
+        bot.send_message(user_id, "Выберите действие",
+                         reply_markup=hamrohbuttons.main_menu_kb(check_nurse))
+    elif message.text == "O'zbek tili":
+        hamrohdatabase.change_language("uzb", user_id)
+        mm = bot.send_message(user_id, "Бош меню", reply_markup=types.ReplyKeyboardRemove())
+        bot.delete_message(user_id, mm.message_id)
+        check_nurse = hamrohdatabase.check_nurse(user_id)
+        bot.send_message(user_id, "Ҳаракатни танланг",
+                         reply_markup=hamrohbuttons.main_menu_kb_uz(check_nurse))
+    else:
+        bot.send_message(user_id, "Выберите язык из списка в меню / Tilni menudan tanlang",
+                         reply_markup=hamrohbuttons.language_kb())
+        bot.register_next_step_handler(message, register_user)
+def register_user(message):
+    user_id = message.from_user.id
+    if message.text == "Русский язык":
+        hamrohdatabase.reg_user(user_id, "rus")
+        mm = bot.send_message(user_id, "Главное меню", reply_markup=types.ReplyKeyboardRemove())
+        bot.delete_message(user_id, mm.message_id)
+        check_nurse = hamrohdatabase.check_nurse(user_id)
+        bot.send_message(user_id, "Выберите действие",
+                         reply_markup=hamrohbuttons.main_menu_kb(check_nurse))
+    elif message.text == "O'zbek tili":
+        hamrohdatabase.reg_user(user_id, "uzb")
+        mm = bot.send_message(user_id, "Бош меню", reply_markup=types.ReplyKeyboardRemove())
+        bot.delete_message(user_id, mm.message_id)
+        check_nurse = hamrohdatabase.check_nurse(user_id)
+        bot.send_message(user_id, "Ҳаракатни танланг",
+                         reply_markup=hamrohbuttons.main_menu_kb_uz(check_nurse))
+    else:
+        bot.send_message(user_id, "Выберите язык из списка в меню / Tilni menudan tanlang",
+                         reply_markup=hamrohbuttons.language_kb())
+        bot.register_next_step_handler(message, register_user)
 def get_vac_gender(message):
     user_id = message.from_user.id
     sex = message.text
@@ -234,7 +382,7 @@ def take_question(message):
         bot.send_message(user_id, "Ваш вопрос отправлен. Вам ответят в ближайшее время",
                          reply_markup=types.ReplyKeyboardRemove())
         bot.send_message(305896408, f"Вопрос от {user_id} \n\n"
-                                f"Вопрос: {question}")
+                                    f"Вопрос: {question}")
         start_message(message)
 def get_nurse_name(message):
     user_id = message.from_user.id
@@ -341,9 +489,240 @@ def get_nurse_photo(message,name, sex, age, education, experience, skills, addre
         start_message(message)
     else:
         bot.send_message(user_id, "Отправьте фотографию")
-        bot.register_next_step_handler(message, get_nurse_phone_number, name, sex, age, education,
-                                       experience, skills, address)
+        bot.register_next_step_handler(message, get_nurse_photo, name, sex, age, education,
+                                       experience, skills, address, phone_number)
 
+def get_vac_gender_uz(message):
+    user_id = message.from_user.id
+    sex = message.text
+    if sex == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Одам ёшини рақамларда ёзинг",
+                         reply_markup=hamrohbuttons.main_menu_reply_kb_uz())
+        bot.register_next_step_handler(message, get_vac_age_uz, sex)
+def get_vac_age_uz(message, sex):
+    user_id = message.from_user.id
+    age = message.text
+    if age == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Кўмакчига муҳтожлик туғдирган асосий касалликни танланг",
+                         reply_markup=hamrohbuttons.disease_button_kb_uz())
+        bot.register_next_step_handler(message, get_vac_disease_uz, sex, age)
+def get_vac_disease_uz(message, sex, age):
+    user_id = message.from_user.id
+    disease = message.text
+    if disease == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Қуйида келтирилган ишлардан нечтасини одам мустақил бажара олади?\n"
+                                  "1.	Озиқ-овқатни енгил тайёрлаш\n"
+                                  "2.	Кийиниш ва ечиниш\n"
+                                  "3.	Чўмилиш\n"
+                                  "4.	Ҳожатга қатнаш ва ўз-ўзини тартибга солиш",
+                         reply_markup=hamrohbuttons.severity_button_kb_uz())
+        bot.register_next_step_handler(message, get_vac_severity_uz, sex, age, disease)
+def get_vac_severity_uz(message, sex, age, disease):
+    user_id = message.from_user.id
+    severity = message.text
+    if severity == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Уй кўмакчиси кунига неча соат давомида сизга керак бўлади?",
+                         reply_markup=hamrohbuttons.schedule_button_kb_uz())
+        bot.register_next_step_handler(message, get_vac_schedule_uz, sex, age, disease, severity)
+def get_vac_schedule_uz(message, sex, age, disease, severity):
+    user_id = message.from_user.id
+    schedule = message.text
+    if schedule == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Кўмакчининг қўчимча хўжалик ишларида (тозалаш, кир ювиш, овқат тайёрлаш, дўконга харид учун чиқиш ва ҳ.к.) ёрдамига муҳтожмисиз",
+                         reply_markup=hamrohbuttons.extrawork_button_kb_uz())
+        bot.register_next_step_handler(message, get_vac_extrawork_uz, sex, age, disease, severity, schedule)
+def get_vac_extrawork_uz(message, sex, age, disease, severity, schedule):
+    user_id = message.from_user.id
+    extra_work = message.text
+    if extra_work == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Кўмакчи сизга қайси муддат давомида керак?",
+                         reply_markup=hamrohbuttons.period_button_kb_uz())
+        bot.register_next_step_handler(message, get_vac_period_uz, sex, age, disease, severity, schedule, extra_work)
+def get_vac_period_uz(message, sex, age, disease, severity, schedule, extra_work):
+    user_id = message.from_user.id
+    period = message.text
+    if period == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Менюдаги тугма ёрдамида ўз рақамингизни жунатинг",
+                         reply_markup=hamrohbuttons.num_button_kb_uz())
+        bot.register_next_step_handler(message, get_vac_phone_number_uz, sex, age, disease, severity, schedule, extra_work,
+                                   period)
+
+def get_vac_phone_number_uz(message, sex, age, disease, severity, schedule, extra_work, period):
+    user_id = message.from_user.id
+    if message.contact:
+        phone_number = message.contact.phone_number
+        bot.send_message(user_id, "Қуйида манзил, хусусан туман номи ва яқин мўлжални ёзинг." 
+                                  "(геолокация жўнатманг)", reply_markup=hamrohbuttons.main_menu_reply_kb_uz())
+        bot.register_next_step_handler(message, get_vac_address_uz, sex, age, disease, severity, schedule, extra_work,
+                                       period, phone_number)
+    elif message.text == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Тугма орқали ўз рақамингизни жўнатманг")
+        bot.register_next_step_handler(message, get_vac_phone_number_uz, sex, age, disease, severity, schedule, extra_work,
+                                       period)
+
+def get_vac_address_uz(message,sex, age, disease, severity, schedule, extra_work, period, phone_number):
+    user_id = message.from_user.id
+    address = message.text
+    if address == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Юқорида келтирилган жавоблардан келиб чиқиб, кўмакчи хизмати учун тўлашга тайёр бўлган нархни ёзинг", reply_markup=hamrohbuttons.main_menu_reply_kb())
+        bot.register_next_step_handler(message, get_vac_salary_uz, sex, age, disease, severity, schedule, extra_work,
+                                   period, phone_number, address)
+def get_vac_salary_uz(message, sex, age, disease, severity, schedule, extra_work, period, phone_number, address):
+    user_id = message.from_user.id
+    salary = message.text
+    if salary == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Сўровингиз жўнатилди", reply_markup=types.ReplyKeyboardRemove())
+        posting = bot.send_message(-1001925064725, f"<b>Жинс</b>: {sex}\n"
+                                                   f"<b>Ёш</b>: {age}\n"
+                                                   f"<b>Касаллик</b>: {disease}\n"
+                                                   f"<b>Мустақиллик даражаси(4 балли шкала)</b>: {severity}\n"
+                                                   f"<b>Иш куни</b>: {schedule}\n"
+                                                   f"<b>Қўшимча иш</b>: {extra_work}\n"
+                                                   f"<b>Иш даври</b>: {period}\n"
+                                                   f"<b>Манзил</b>: {address}\n"
+                                                   f"<b>Тўлов</b>: {salary}\n"
+                                                   f"<b>Телефон</b>: {phone_number}", parse_mode="html")
+        message_id = posting.message_id
+        hamrohdatabase.add_vac(user_id, sex, age, disease, severity, schedule, extra_work, period,
+                               phone_number, address, salary, message_id)
+        start_message(message)
+def take_question_uz(message):
+    user_id = message.from_user.id
+    question = message.text
+    if question == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Сўровингиз жўнатилди. Сизга яқин вақт оралиғида жавоб беришади",
+                         reply_markup=types.ReplyKeyboardRemove())
+        bot.send_message(305896408, f"{user_id} дан савол\n\n"
+                                f"Савол: {question}")
+        start_message(message)
+def get_nurse_name_uz(message):
+    user_id = message.from_user.id
+    name = message.text
+    if name == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Ўз жинсингизни танланг", reply_markup=hamrohbuttons.gender_kb_uz())
+        bot.register_next_step_handler(message, get_nurse_gender_uz, name)
+def get_nurse_gender_uz(message, name):
+    user_id = message.from_user.id
+    sex = message.text
+    if sex == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Туғилган йилингизни ёзинг", reply_markup=hamrohbuttons.main_menu_reply_kb_uz())
+        bot.register_next_step_handler(message, get_nurse_age_uz, name, sex)
+def get_nurse_age_uz(message, name, sex):
+    user_id = message.from_user.id
+    age = message.text
+    if age == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Ўз маълумотингиз ва мутахассислигингиз ҳақида қисқа ва аниқ ёзинг",
+                         reply_markup=types.ReplyKeyboardRemove())
+        bot.register_next_step_handler(message, get_nurse_education_uz, name, sex, age)
+def get_nurse_education_uz(message, name, sex, age):
+    user_id = message.from_user.id
+    education = message.text
+    if education == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Бемор одамлар парвариши билан боғлиқ иш тажрибангиз ҳақида қисқа ва аниқ маълумот ёзинг. "
+                                 "Неча йил ва қандай одамлар билан ишлаганингиз ҳақида ёзинг. Бир неча жойда ишлаган бўлсангиз, ҳар бир тажрибангизни тартиб рақамлар (1. 2. 3.) билан ажратсангиз бўлади.",
+                         reply_markup=hamrohbuttons.main_menu_reply_kb_uz())
+        bot.register_next_step_handler(message, get_nurse_experience_uz, name, sex, age, education)
+def get_nurse_experience_uz(message, name, sex, age, education):
+    user_id = message.from_user.id
+    experience = message.text
+    if experience == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Уйдаги парваришда ёрдам бериши мумкин бўлган кўникмаларингиз ҳақида ёзинг.",
+                         reply_markup=hamrohbuttons.main_menu_reply_kb_uz())
+        bot.register_next_step_handler(message, get_nurse_skills_uz, name, sex, age, education, experience)
+def get_nurse_skills_uz(message, name, sex, age, education, experience):
+    user_id = message.from_user.id
+    skills = message.text
+    if skills == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Турар манзилингиз, хусусан туманни ёзинг (геолокацияни жўнатманг)",
+                         reply_markup=hamrohbuttons.main_menu_reply_kb_uz())
+        bot.register_next_step_handler(message, get_nurse_address_uz, name, sex, age, education, experience, skills)
+def get_nurse_address_uz(message, name, sex, age, education, experience, skills):
+    user_id = message.from_user.id
+    address = message.text
+    if address == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Менюдаги тугма ёрдамида ўз рақамингизни жўнатинг",
+                         reply_markup=hamrohbuttons.num_button_kb_uz())
+        bot.register_next_step_handler(message, get_nurse_phone_number_uz, name, sex, age, education, experience, skills, address)
+def get_nurse_phone_number_uz(message, name, sex, age, education, experience, skills, address):
+    user_id = message.from_user.id
+    if message.contact:
+        phone_number = message.contact.phone_number
+        bot.send_message(user_id, "Ўз фотосуратингизни юкланг. "
+                                  "Яхши ёритилган, сифатли фотосурат бўлиши керак. "
+                                  "Жилмайишни унутманг ",
+                         reply_markup=hamrohbuttons.main_menu_reply_kb_uz())
+        bot.register_next_step_handler(message, get_nurse_photo_uz, name, sex, age, education, experience, skills,
+                                       address, phone_number)
+    elif message.text == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Тугма ёрдамида ўз рақамингизни жўнатинг")
+        bot.register_next_step_handler(message, get_nurse_phone_number_uz, name, sex, age, education,
+                                       experience, skills, address)
+def get_nurse_photo_uz(message,name, sex, age, education, experience, skills, address, phone_number):
+    user_id = message.from_user.id
+    if message.photo:
+        photo = message.photo[-1].file_id
+        bot.send_message(user_id, "Анкетангиз тайёр",
+                         reply_markup=types.ReplyKeyboardRemove())
+        posting = bot.send_photo(-1001905443362, photo=photo, caption=f"{name}\n"
+                                                                      f"<b>Жинс</b>: {sex}\n"
+                                                                      f"<b>Ёш</b>: {age}\n"
+                                                                      f"<b>Маълумот</b>: {education}\n"
+                                                                      f"<b>Иш тажрибаси</b>: {experience}\n"
+                                                                      f"<b>Кўникмалар</b>: {skills}\n"
+                                                                      f"<b>Манзил</b>: {address}\n"
+                                                                      f"<b>Телефон рақами</b>: {phone_number}",
+                                 parse_mode="html")
+        message_id = posting.message_id
+
+        hamrohdatabase.add_nurse(user_id, name, sex, age, education, experience, skills, address, phone_number, photo,
+                                 message_id)
+        # photo = hamrohdatabase.get_nurses_photo(user_id)
+        # bot.send_photo(user_id, photo=photo[0])
+        start_message(message)
+    elif message.text == "Бош меню":
+        start_message(message)
+    else:
+        bot.send_message(user_id, "Фотосуратни жўнатинг")
+        bot.register_next_step_handler(message, get_nurse_phone_number_uz, name, sex, age, education,
+                                       experience, skills, address)
 
 # open(file, 'rb')
 bot.polling(non_stop=True)
