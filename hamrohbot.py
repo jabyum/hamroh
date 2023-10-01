@@ -3,10 +3,13 @@ import hamrohdatabase
 import hamrohbuttons
 from telebot import types
 import time
-bot = telebot.TeleBot("6269391112:AAFlxxKYVCaFS6l2BS26nmMATi3bSCoQ1hg")
+import threading
+bot = telebot.TeleBot("6527744179:AAGCZ0BFwA6VXkqZ5BVDtetE4NtfL7wg7XQ")
+
 @bot.message_handler(commands=["start"])
 def start_message(message):
     user_id = message.from_user.id
+
     language = hamrohdatabase.check_language(user_id)
     if language == False:
         bot.send_message(user_id, "Выберите язык / Tilni tanlang", reply_markup=hamrohbuttons.language_kb())
@@ -31,191 +34,276 @@ def start_message(message):
                                                        "vacancy_uz", "vac_base_uz", "take_vacancy_uz", "yes_delete_uz",
                                                        "no_delete_uz", "delete_registration_uz", "delete_vacancy_uz",
                                                        "yes_delete_vac_uz", "no_delete_vac_uz", "nurse_base_uz",
-                                                       "change_language"])
+                                                       "change_language", "add_admin", "del_admin", "mailing",
+                                                       "close"])
 def calling(call):
     user_id = call.message.chat.id
-    if call.data == "about":
-        bot.delete_message(user_id, call.message.message_id)
-        bot.send_message(user_id, "Ассалому алейкум!\n\nМы рады, что вы обратились в HAMROH.\n\n"
-                                  "Мы предоставляем профессиональный уход за людьми с инвалидностью на дому в Ташкенте.\n\n"
-                                  "Более подробную информацию о нашей организации и услугах вы найдете на сайте hamroh.org\n\n"
-                                  "Данный бот предоставляет площадку для связывания домашнего помощника с клиентом.",
-                         reply_markup=hamrohbuttons.main_menu_call_kb())
-    elif call.data == "main menu":
-        bot.delete_message(user_id, call.message.message_id)
-        return start_message(call)
-    elif call.data == "delete_registration":
-        bot.send_message(user_id, "Вы уверены, что хотите удалить свою анкету?",
-                         reply_markup=hamrohbuttons.delete_registration_kb())
-    elif call.data == "no_delete":
-        bot.delete_message(user_id, call.message.message_id)
-        return start_message(call)
-    elif call.data == "yes_delete":
-        try:
+    try:
+        if call.data == "about":
             bot.delete_message(user_id, call.message.message_id)
-            nurse_message_id = hamrohdatabase.get_nurse_message_id(user_id)
-            hamrohdatabase.delete_exact_nurse(user_id)
-            bot.send_message(user_id, "Ваша анкета удалена")
-            start_message(call)
-            try:
-                bot.delete_message(-1001905443362, nurse_message_id)
-            except:
-                pass
-        except:
+            bot.send_message(user_id, "Ассалому алейкум!\n\nМы рады, что вы обратились в HAMROH.\n\n"
+                                      "Мы предоставляем профессиональный уход за людьми с инвалидностью на дому в Ташкенте.\n\n"
+                                      "Более подробную информацию о нашей организации и услугах вы найдете на сайте hamroh.org\n\n"
+                                      "Данный бот предоставляет площадку для связывания домашнего помощника с клиентом.",
+                             reply_markup=hamrohbuttons.main_menu_call_kb())
+        elif call.data == "main menu":
             bot.delete_message(user_id, call.message.message_id)
-            bot.send_message(user_id, "Произошла ошибка. Обратиться в службу поддержки")
             return start_message(call)
-    elif call.data == "delete_vacancy":
-        bot.delete_message(user_id, call.message.message_id)
-        bot.send_message(user_id, "Вы уверены, что хотите удалить вакансию?",
-                         reply_markup=hamrohbuttons.delete_vacancy_kb())
-    elif call.data == "registration":
-        bot.delete_message(user_id, call.message.message_id)
-        bot.send_message(user_id, "Для того, чтобы оставить свою анкету в базе помощников, пожалуйста ответьте"
-                                  " на следующие вопросы.\n\n"
-                                  "Напишите своё имя и фамилию.\n\n"
-                                  "Если вы нажмете на кнопку 'Главное меню' в процессе заполнения, "
-                                  "анкету придется заполнять заново",
-                         reply_markup=hamrohbuttons.main_menu_reply_kb())
-        bot.register_next_step_handler(call.message, get_nurse_name)
+        elif call.data == "delete_registration":
+            bot.send_message(user_id, "Вы уверены, что хотите удалить свою анкету?",
+                             reply_markup=hamrohbuttons.delete_registration_kb())
+        elif call.data == "no_delete":
+            bot.delete_message(user_id, call.message.message_id)
+            return start_message(call)
+        elif call.data == "yes_delete":
+            try:
+                bot.delete_message(user_id, call.message.message_id)
+                nurse_message_id = hamrohdatabase.get_nurse_message_id(user_id)
+                hamrohdatabase.delete_exact_nurse(user_id)
+                bot.send_message(user_id, "Ваша анкета удалена")
+                start_message(call)
+                try:
+                    bot.delete_message(-1001905443362, nurse_message_id)
+                except:
+                    pass
+            except:
+                bot.delete_message(user_id, call.message.message_id)
+                bot.send_message(user_id, "Произошла ошибка. Обратиться в службу поддержки")
+                return start_message(call)
+        elif call.data == "delete_vacancy":
+            bot.delete_message(user_id, call.message.message_id)
+            bot.send_message(user_id, "Вы уверены, что хотите удалить вакансию?",
+                             reply_markup=hamrohbuttons.delete_vacancy_kb())
+        elif call.data == "registration":
+            bot.delete_message(user_id, call.message.message_id)
+            bot.send_message(user_id, "Для того, чтобы оставить свою анкету в базе помощников, пожалуйста ответьте"
+                                      " на следующие вопросы.\n\n"
+                                      "Напишите своё имя и фамилию.\n\n"
+                                      "Если вы нажмете на кнопку 'Главное меню' в процессе заполнения, "
+                                      "анкету придется заполнять заново",
+                             reply_markup=hamrohbuttons.main_menu_reply_kb())
+            bot.register_next_step_handler(call.message, get_nurse_name)
 
-    elif call.data == "question":
-        bot.delete_message(user_id, call.message.message_id)
-        bot.send_message(user_id, "Напишите свой вопрос",
-                         reply_markup=hamrohbuttons.main_menu_reply_kb())
-        bot.register_next_step_handler(call.message, take_question)
-    elif call.data == "vacancy":
-        bot.delete_message(user_id, call.message.message_id)
-        check_vac = hamrohdatabase.check_vac(user_id)
-        bot.send_message(user_id, "Вы можете выбрать и помощника из имеющихся в базе помощников "
-                                  "или оставить свой запрос открытым",
-                         reply_markup=hamrohbuttons.vac_format_kb(check_vac))
-    elif call.data == "no_delete_vac":
-        bot.delete_message(user_id, call.message.message_id)
-        return start_message(call)
-    elif call.data == "yes_delete_vac":
-        try:
+        elif call.data == "question":
             bot.delete_message(user_id, call.message.message_id)
-            vac_message_id = hamrohdatabase.get_vacancy_message_id(user_id)
-            hamrohdatabase.delete_exact_vacancie(user_id)
-            bot.send_message(user_id, "Ваша вакансия удалена")
-            start_message(call)
-            try:
-                bot.delete_message(-1001925064725, vac_message_id)
-            except:
-                pass
-        except:
+            bot.send_message(user_id, "Напишите свой вопрос",
+                             reply_markup=hamrohbuttons.main_menu_reply_kb())
+            bot.register_next_step_handler(call.message, take_question)
+        elif call.data == "vacancy":
             bot.delete_message(user_id, call.message.message_id)
-            bot.send_message(user_id, "Произошла ошибка. Обратиться в службу поддержки")
+            check_vac = hamrohdatabase.check_vac(user_id)
+            bot.send_message(user_id, "Вы можете выбрать и помощника из имеющихся в базе помощников "
+                                      "или оставить свой запрос открытым",
+                             reply_markup=hamrohbuttons.vac_format_kb(check_vac))
+        elif call.data == "no_delete_vac":
+            bot.delete_message(user_id, call.message.message_id)
             return start_message(call)
-    elif call.data == "vac_base":
-        bot.delete_message(user_id, call.message.message_id)
-        bot.send_message(user_id, "Канал с актуальными вакансиями\n"
-                                  "https://t.me/+_iYh4_uI7YhiNjJi",
-                         reply_markup=hamrohbuttons.main_menu_call_kb())
-    elif call.data == "nurse_base":
-        bot.delete_message(user_id, call.message.message_id)
-        bot.send_message(user_id, "Канал с анкетами сиделок\n"
-                                  "https://t.me/+8BN_TP1AX8Y4ZjIy",
-                         reply_markup=hamrohbuttons.main_menu_call_kb())
-    elif call.data == "take_vacancy":
-        bot.delete_message(user_id, call.message.message_id)
-        bot.send_message(user_id,"Пожалуйста, выберите подходящий вариант. Для кого нужен помощник?\n"
-                                 "Если вы нажмете на кнопку 'Главное меню' в процессе заполнения, "
-                                  "анкету придется заполнять заново",
-                         reply_markup=hamrohbuttons.vac_gender_kb())
-        bot.register_next_step_handler(call.message, get_vac_gender)
-    elif call.data == "about_uz":
-        bot.delete_message(user_id, call.message.message_id)
-        bot.send_message(user_id, "Ассалому алейкум!\n\nHAMROH га мурожаат қилганингиздан хунсандмиз.\n\n"
-                                  "Тошкент шахрида ногиронлиги мавжуд одамларга профессионал парвариш хизматини таъминлаймиз.\n\n"
-                                  "Бизнинг ташкилот ва хизматлар тўғрисида hamroh.org сайтидан янада батафсил маълумотни топишингиз мумкин\n\n"
-                                  "Ушбу бот уй кўмакчиси ва мижоз ўртасида боғланишни таъминлайди.",
-                         reply_markup=hamrohbuttons.main_menu_call_kb_uz())
-    elif call.data == "main menu_uz":
-        bot.delete_message(user_id, call.message.message_id)
-        return start_message(call)
-    elif call.data == "delete_registration_uz":
-        bot.send_message(user_id, "Анкетангизни ўчиришни аниқ хоҳлайсизми?",
-                         reply_markup=hamrohbuttons.delete_registration_kb_uz())
-    elif call.data == "no_delete_uz":
-        bot.delete_message(user_id, call.message.message_id)
-        return start_message(call)
-    elif call.data == "yes_delete_uz":
-        try:
-            bot.delete_message(user_id, call.message.message_id)
-            nurse_message_id = hamrohdatabase.get_nurse_message_id(user_id)
-            hamrohdatabase.delete_exact_nurse(user_id)
-            bot.send_message(user_id, "Сизнинг анкетангиз ўчирилди")
-            start_message(call)
+        elif call.data == "yes_delete_vac":
             try:
-                bot.delete_message(-1001905443362, nurse_message_id)
+                bot.delete_message(user_id, call.message.message_id)
+                vac_message_id = hamrohdatabase.get_vacancy_message_id(user_id)
+                hamrohdatabase.delete_exact_vacancie(user_id)
+                bot.send_message(user_id, "Ваша вакансия удалена")
+                start_message(call)
+                try:
+                    bot.delete_message(-1001925064725, vac_message_id)
+                except:
+                    pass
             except:
-                pass
-        except:
+                bot.delete_message(user_id, call.message.message_id)
+                bot.send_message(user_id, "Произошла ошибка. Обратиться в службу поддержки")
+                return start_message(call)
+        elif call.data == "vac_base":
             bot.delete_message(user_id, call.message.message_id)
-            bot.send_message(user_id, "Хато юз берди. Қўллаб-қувватлаш хизматига мурожаат қилиш")
+            bot.send_message(user_id, "Канал с актуальными вакансиями\n"
+                                      "https://t.me/+_iYh4_uI7YhiNjJi",
+                             reply_markup=hamrohbuttons.main_menu_call_kb())
+        elif call.data == "nurse_base":
+            bot.delete_message(user_id, call.message.message_id)
+            bot.send_message(user_id, "Канал с анкетами сиделок\n"
+                                      "https://t.me/+8BN_TP1AX8Y4ZjIy",
+                             reply_markup=hamrohbuttons.main_menu_call_kb())
+        elif call.data == "take_vacancy":
+            bot.delete_message(user_id, call.message.message_id)
+            bot.send_message(user_id,"Пожалуйста, выберите подходящий вариант. Для кого нужен помощник?\n"
+                                     "Если вы нажмете на кнопку 'Главное меню' в процессе заполнения, "
+                                      "анкету придется заполнять заново",
+                             reply_markup=hamrohbuttons.vac_gender_kb())
+            bot.register_next_step_handler(call.message, get_vac_gender)
+        elif call.data == "about_uz":
+            bot.delete_message(user_id, call.message.message_id)
+            bot.send_message(user_id, "Ассалому алейкум!\n\nHAMROH га мурожаат қилганингиздан хунсандмиз.\n\n"
+                                      "Тошкент шахрида ногиронлиги мавжуд одамларга профессионал парвариш хизматини таъминлаймиз.\n\n"
+                                      "Бизнинг ташкилот ва хизматлар тўғрисида hamroh.org сайтидан янада батафсил маълумотни топишингиз мумкин\n\n"
+                                      "Ушбу бот уй кўмакчиси ва мижоз ўртасида боғланишни таъминлайди.",
+                             reply_markup=hamrohbuttons.main_menu_call_kb_uz())
+        elif call.data == "main menu_uz":
+            bot.delete_message(user_id, call.message.message_id)
             return start_message(call)
-    elif call.data == "delete_vacancy_uz":
-        bot.delete_message(user_id, call.message.message_id)
-        bot.send_message(user_id, "Вакансияни ўчиришни аниқ хоғлайсизми?",
-                         reply_markup=hamrohbuttons.delete_vacancy_kb_uz())
-    elif call.data == "registration_uz":
-        bot.delete_message(user_id, call.message.message_id)
-        bot.send_message(user_id, "Кўмакчилар базасида ўз анкетангизни қолдириш учун қуйидаги саволларга жавоб беринг.\n\n"
-                                  "Ўз исм ва фамилиянгизни ёзинг.\n\n"
-                                  "Тўлдириш жараёнида 'Бош меню' тугмасини боссангиз анкетани қайтадан тўлдиришга тўғри келади",
-                         reply_markup=hamrohbuttons.main_menu_reply_kb_uz())
-        bot.register_next_step_handler(call.message, get_nurse_name_uz)
+        elif call.data == "delete_registration_uz":
+            bot.send_message(user_id, "Анкетангизни ўчиришни аниқ хоҳлайсизми?",
+                             reply_markup=hamrohbuttons.delete_registration_kb_uz())
+        elif call.data == "no_delete_uz":
+            bot.delete_message(user_id, call.message.message_id)
+            return start_message(call)
+        elif call.data == "yes_delete_uz":
+            try:
+                bot.delete_message(user_id, call.message.message_id)
+                nurse_message_id = hamrohdatabase.get_nurse_message_id(user_id)
+                hamrohdatabase.delete_exact_nurse(user_id)
+                bot.send_message(user_id, "Сизнинг анкетангиз ўчирилди")
+                start_message(call)
+                try:
+                    bot.delete_message(-1001905443362, nurse_message_id)
+                except:
+                    pass
+            except:
+                bot.delete_message(user_id, call.message.message_id)
+                bot.send_message(user_id, "Хато юз берди. Қўллаб-қувватлаш хизматига мурожаат қилиш")
+                return start_message(call)
+        elif call.data == "delete_vacancy_uz":
+            bot.delete_message(user_id, call.message.message_id)
+            bot.send_message(user_id, "Вакансияни ўчиришни аниқ хоғлайсизми?",
+                             reply_markup=hamrohbuttons.delete_vacancy_kb_uz())
+        elif call.data == "registration_uz":
+            bot.delete_message(user_id, call.message.message_id)
+            bot.send_message(user_id, "Кўмакчилар базасида ўз анкетангизни қолдириш учун қуйидаги саволларга жавоб беринг.\n\n"
+                                      "Ўз исм ва фамилиянгизни ёзинг.\n\n"
+                                      "Тўлдириш жараёнида 'Бош меню' тугмасини боссангиз анкетани қайтадан тўлдиришга тўғри келади",
+                             reply_markup=hamrohbuttons.main_menu_reply_kb_uz())
+            bot.register_next_step_handler(call.message, get_nurse_name_uz)
 
-    elif call.data == "question_uz":
-        bot.delete_message(user_id, call.message.message_id)
-        bot.send_message(user_id, "Саволингизни ёзинг",
-                         reply_markup=hamrohbuttons.main_menu_reply_kb_uz())
-        bot.register_next_step_handler(call.message, take_question_uz)
-    elif call.data == "vacancy_uz":
-        bot.delete_message(user_id, call.message.message_id)
-        check_vac = hamrohdatabase.check_vac(user_id)
-        bot.send_message(user_id, "Кўмакчилар базасида мавжуд кўмакчини танлашингиз мумкин ёки сўровингиз очиқ қолдиришингиз мумкин",
-                         reply_markup=hamrohbuttons.vac_format_kb_uz(check_vac))
-    elif call.data == "no_delete_vac_uz":
-        bot.delete_message(user_id, call.message.message_id)
-        return start_message(call)
-    elif call.data == "yes_delete_vac_uz":
-        try:
+        elif call.data == "question_uz":
             bot.delete_message(user_id, call.message.message_id)
-            vac_message_id = hamrohdatabase.get_vacancy_message_id(user_id)
-            hamrohdatabase.delete_exact_vacancie(user_id)
-            bot.send_message(user_id, "Вакансиянгиз ўчирилди")
-            start_message(call)
-            try:
-                bot.delete_message(-1001925064725, vac_message_id)
-            except:
-                pass
-        except:
+            bot.send_message(user_id, "Саволингизни ёзинг",
+                             reply_markup=hamrohbuttons.main_menu_reply_kb_uz())
+            bot.register_next_step_handler(call.message, take_question_uz)
+        elif call.data == "vacancy_uz":
             bot.delete_message(user_id, call.message.message_id)
-            bot.send_message(user_id, "Хато юз берди. Қўллаб-қувватлаш хизматига мурожаат қилиш")
+            check_vac = hamrohdatabase.check_vac(user_id)
+            bot.send_message(user_id, "Кўмакчилар базасида мавжуд кўмакчини танлашингиз мумкин ёки сўровингиз очиқ қолдиришингиз мумкин",
+                             reply_markup=hamrohbuttons.vac_format_kb_uz(check_vac))
+        elif call.data == "no_delete_vac_uz":
+            bot.delete_message(user_id, call.message.message_id)
             return start_message(call)
-    elif call.data == "vac_base_uz":
-        bot.delete_message(user_id, call.message.message_id)
-        bot.send_message(user_id, "Жорий вакансиялар канали\n"
-                                  "https://t.me/+lyN7cNoZ40VmZDVi",
-                         reply_markup=hamrohbuttons.main_menu_call_kb_uz())
-    elif call.data == "nurse_base_uz":
-        bot.delete_message(user_id, call.message.message_id)
-        bot.send_message(user_id, "Энагалар анкеталари канали\n"
-                                  "https://t.me/+8BN_TP1AX8Y4ZjIy",
-                         reply_markup=hamrohbuttons.main_menu_call_kb_uz())
-    elif call.data == "take_vacancy_uz":
-        bot.delete_message(user_id, call.message.message_id)
-        bot.send_message(user_id,"Тегишли вариантни танланг. Кўмакчи ким учун керак?\n"
-                                 "Тўлдириш жараёнида 'Бош меню' тугмасини боссангиз анкетани қайтадан тўлдиришга тўғри келади",
-                         reply_markup=hamrohbuttons.vac_gender_kb_uz())
-        bot.register_next_step_handler(call.message, get_vac_gender_uz)
-    elif call.data == "change_language":
-        bot.delete_message(user_id, call.message.message_id)
-        bot.send_message(user_id, "Выберите язык / Tilni tanlang", reply_markup=hamrohbuttons.language_kb())
-        bot.register_next_step_handler(call.message, change_language)
+        elif call.data == "yes_delete_vac_uz":
+            try:
+                bot.delete_message(user_id, call.message.message_id)
+                vac_message_id = hamrohdatabase.get_vacancy_message_id(user_id)
+                hamrohdatabase.delete_exact_vacancie(user_id)
+                bot.send_message(user_id, "Вакансиянгиз ўчирилди")
+                start_message(call)
+                try:
+                    bot.delete_message(-1001925064725, vac_message_id)
+                except:
+                    pass
+            except:
+                bot.delete_message(user_id, call.message.message_id)
+                bot.send_message(user_id, "Хато юз берди. Қўллаб-қувватлаш хизматига мурожаат қилиш")
+                return start_message(call)
+        elif call.data == "vac_base_uz":
+            bot.delete_message(user_id, call.message.message_id)
+            bot.send_message(user_id, "Жорий вакансиялар канали\n"
+                                      "https://t.me/+lyN7cNoZ40VmZDVi",
+                             reply_markup=hamrohbuttons.main_menu_call_kb_uz())
+        elif call.data == "nurse_base_uz":
+            bot.delete_message(user_id, call.message.message_id)
+            bot.send_message(user_id, "Энагалар анкеталари канали\n"
+                                      "https://t.me/+8BN_TP1AX8Y4ZjIy",
+                             reply_markup=hamrohbuttons.main_menu_call_kb_uz())
+        elif call.data == "take_vacancy_uz":
+            bot.delete_message(user_id, call.message.message_id)
+            bot.send_message(user_id,"Тегишли вариантни танланг. Кўмакчи ким учун керак?\n"
+                                     "Тўлдириш жараёнида 'Бош меню' тугмасини боссангиз анкетани қайтадан тўлдиришга тўғри келади",
+                             reply_markup=hamrohbuttons.vac_gender_kb_uz())
+            bot.register_next_step_handler(call.message, get_vac_gender_uz)
+        elif call.data == "change_language":
+            bot.delete_message(user_id, call.message.message_id)
+            bot.send_message(user_id, "Выберите язык / Tilni tanlang", reply_markup=hamrohbuttons.language_kb())
+            bot.register_next_step_handler(call.message, change_language)
+        elif call.data == "add_admin":
+            bot.delete_message(user_id, call.message.message_id)
+            bot.send_message(user_id, "Введите tg-id нового админа",
+                             reply_markup=hamrohbuttons.canceling())
+            bot.register_next_step_handler(call.message, add_admin)
+        elif call.data == "close":
+            bot.delete_message(user_id, call.message.message_id)
+        elif call.data == "del_admin":
+            bot.delete_message(user_id, call.message.message_id)
+            bot.send_message(user_id, "Введите tg id адмна",
+                             reply_markup=hamrohbuttons.canceling())
+            bot.register_next_step_handler(call.message, delete_admin)
+        elif call.data == "mailing":
+            bot.delete_message(user_id, call.message.message_id)
+            bot.send_message(user_id, "Введите текст рассылки, либо отмените рассылку через кнопку в меню",
+                             reply_markup=hamrohbuttons.canceling())
+            bot.register_next_step_handler(call.message, mailing_to_all)
+    except:
+        pass
+
+
+def send_message_to_user(target_id, text):
+    target = target_id[0]
+    try:
+        time.sleep(1)
+        bot.send_message(target, text)
+    except:
+        pass
+def mailing_to_all(message):
+    user_id = message.from_user.id
+    targets_id = hamrohdatabase.mailing_all()
+    print(targets_id)
+    text = message.text
+    if text == "Отмена❌":
+        bot.send_message(user_id, "Рассылка отменена", reply_markup=types.ReplyKeyboardRemove())
+    else:
+        for target_id in targets_id:
+            thread = threading.Thread(target=send_message_to_user, args=(target_id, text))
+            thread.start()
+    bot.send_message(user_id, "Рассылка завершена", reply_markup=types.ReplyKeyboardRemove())
+    admin_panel(message)
+
+def delete_admin(message):
+    user_id = message.from_user.id
+    admin_id = message.text
+    if admin_id == "Отмена❌":
+         bot.send_message(user_id, "Отмена", reply_markup=types.ReplyKeyboardRemove())
+    else:
+        try:
+            checker = hamrohdatabase.check_admin(int(admin_id))
+            if checker:
+                hamrohdatabase.delete_admin(int(admin_id))
+                bot.send_message(user_id, "Админ удалён")
+                bot.send_message(int(admin_id), "Вы больше не являетесь админом")
+                bot.kick_chat_member(-1001806564382, int(admin_id))
+                admin_panel(message)
+            else:
+                bot.send_message(user_id, "Юзер не является админом")
+                admin_panel(message)
+        except:
+            bot.send_message(user_id, "Ошибка в id")
+            admin_panel(message)
+def add_admin(message):
+    user_id = message.from_user.id
+    new_admin_id = message.text
+    rank = 1
+    if new_admin_id == "Отмена❌":
+         bot.send_message(user_id, "Отмена", reply_markup=types.ReplyKeyboardRemove())
+    else:
+        try:
+            checker = hamrohdatabase.check_admin(int(new_admin_id))
+            if checker:
+                bot.send_message(user_id, "Юзер уже является админом")
+                admin_panel(message)
+            else:
+                hamrohdatabase.add_admin(int(new_admin_id), rank)
+                bot.send_message(user_id, "Админ добавлен")
+                bot.send_message(int(new_admin_id), "Вы стали админом 1 ранга\n")
+
+                admin_panel(message)
+        except:
+            bot.send_message(user_id, "Ошибка в id")
+            admin_panel(message)
 
 def change_language(message):
     user_id = message.from_user.id
@@ -272,7 +360,8 @@ def get_vac_age(message, sex):
     if age == "Главное меню":
         start_message(message)
     else:
-        bot.send_message(user_id, "Выберите основное заболевание, из-за которого требуется помощник",
+        bot.send_message(user_id, "Выберите основное заболевание, из-за которого требуется помощник "
+                                  "или напишите его сами",
                          reply_markup=hamrohbuttons.disease_button_kb())
         bot.register_next_step_handler(message, get_vac_disease, sex, age)
 def get_vac_disease(message, sex, age):
@@ -507,7 +596,7 @@ def get_vac_age_uz(message, sex):
     if age == "Бош меню":
         start_message(message)
     else:
-        bot.send_message(user_id, "Кўмакчига муҳтожлик туғдирган асосий касалликни танланг",
+        bot.send_message(user_id, "Кўмакчига муҳтожлик туғдирган асосий касалликни танланг ёки ўзингиз ёзинг",
                          reply_markup=hamrohbuttons.disease_button_kb_uz())
         bot.register_next_step_handler(message, get_vac_disease_uz, sex, age)
 def get_vac_disease_uz(message, sex, age):
@@ -723,6 +812,19 @@ def get_nurse_photo_uz(message,name, sex, age, education, experience, skills, ad
         bot.send_message(user_id, "Фотосуратни жўнатинг")
         bot.register_next_step_handler(message, get_nurse_phone_number_uz, name, sex, age, education,
                                        experience, skills, address)
+
+
+@bot.message_handler(commands=["admin"])
+def admin_panel(message):
+    user_id = message.from_user.id
+    checker = hamrohdatabase.check_admin(user_id)
+    types.ReplyKeyboardRemove()
+    if checker == True:
+        bot.send_message(user_id, "Админ панель. Выберите действие",
+                         reply_markup=hamrohbuttons.main_admin_menu())
+    else:
+        pass
+
 
 # open(file, 'rb')
 bot.polling(non_stop=True)

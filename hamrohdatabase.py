@@ -10,6 +10,8 @@ sql.execute("CREATE TABLE IF NOT EXISTS nurses (nurse_id INTEGER PRIMARY KEY AUT
             "sex TEXT, age TEXT, education TEXT, experience TEXT, skills TEXT, address TEXT,"
             "phone_number TEXT, photo BLOB NOT NULL, message_id INTEGER, nurse_reg_date DATETIME);")
 sql.execute("CREATE TABLE IF NOT EXISTS admins (admin_id INTEGER, rank INTEGER, admin_reg_date DATETIME);")
+sql.execute("CREATE TABLE IF NOT EXISTS mailing (name TEXT, chat_id INTEGER, message_id TEXT, reg_date DATETIME);")
+
 
 connection.commit()
 def reg_user(user_id, language):
@@ -98,3 +100,27 @@ def delete_exact_vacancie(user_id):
     sql = connection.cursor()
     sql.execute("DELETE FROM vacancies WHERE tg_id=?;", (user_id, ))
     connection.commit()
+def add_admin(admin_id, rank):
+    connection = sqlite3.connect('hamrohbotbase.db')
+    sql = connection.cursor()
+    sql.execute('INSERT INTO admins (admin_id, rank, admin_reg_date)'
+                'VALUES (?, ?, ?);', (admin_id, rank, datetime.now()))
+    connection.commit()
+def check_admin(user_id):
+    connection = sqlite3.connect("hamrohbotbase.db")
+    sql = connection.cursor()
+    checker = sql.execute("SELECT admin_id FROM admins WHERE admin_id=?;", (user_id, ))
+    if checker.fetchone():
+        return True
+    else:
+        return False
+def delete_admin(admin_id):
+    connection = sqlite3.connect("hamrohbotbase.db")
+    sql = connection.cursor()
+    sql.execute("DELETE FROM admins WHERE admin_id=?;", (admin_id, ))
+    connection.commit()
+def mailing_all():
+    connection = sqlite3.connect("hamrohbotbase.db")
+    sql = connection.cursor()
+    all_targets = sql.execute("SELECT tg_id FROM all_users;",).fetchall()
+    return all_targets

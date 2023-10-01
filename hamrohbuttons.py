@@ -73,9 +73,8 @@ def disease_button_kb():
     demention = KeyboardButton("Деменция (б-нь Альцгеймера)")
     insult = KeyboardButton("Инсульт")
     onco = KeyboardButton("Онкологическое заболевание")
-    another = KeyboardButton("Другое")
     mm = InlineKeyboardButton(text="Главное меню")
-    kb.add(demention, insult, onco, another, mm)
+    kb.add(demention, insult, onco, mm)
     return kb
 def severity_button_kb():
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
@@ -189,9 +188,8 @@ def disease_button_kb_uz():
     demention = KeyboardButton("Деменция (Альцгеймер касаллиги)")
     insult = KeyboardButton("Инсульт")
     onco = KeyboardButton("Онкологик касаллик")
-    another = KeyboardButton("Бошқа")
     mm = InlineKeyboardButton(text="Бош меню")
-    kb.add(demention, insult, onco, another, mm)
+    kb.add(demention, insult, onco, mm)
     return kb
 def severity_button_kb_uz():
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
@@ -237,4 +235,20 @@ def delete_vacancy_kb_uz():
     yes = InlineKeyboardButton(text="Ҳа, ўчирилсин", callback_data="yes_delete_vac_uz")
     no = InlineKeyboardButton(text="Йўқ, ўчирилмасин", callback_data="no_delete_vac_uz")
     kb.row(yes, no)
+    return kb
+def main_admin_menu():
+    kb = InlineKeyboardMarkup(row_width=1)
+    add_admin = InlineKeyboardButton(text="Добавить администратора", callback_data="add_admin")
+    delete_admin = InlineKeyboardButton(text="Удалить администратора", callback_data="del_admin")
+    mailing = InlineKeyboardButton(text="Создать рассылку", callback_data="mailing")
+    close = InlineKeyboardButton(text="Закрыть", callback_data="close")
+    kb.row(add_admin)
+    kb.row(delete_admin)
+    kb.row(mailing)
+    kb.row(close)
+    return kb
+def canceling():
+    kb = ReplyKeyboardMarkup(resize_keyboard=True)
+    cancel = KeyboardButton("Отмена❌")
+    kb.add(cancel)
     return kb
