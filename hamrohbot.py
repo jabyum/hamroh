@@ -35,7 +35,7 @@ def start_message(message):
                                                        "no_delete_uz", "delete_registration_uz", "delete_vacancy_uz",
                                                        "yes_delete_vac_uz", "no_delete_vac_uz", "nurse_base_uz",
                                                        "change_language", "add_admin", "del_admin", "mailing",
-                                                       "close"])
+                                                       "close", "send_message"])
 def calling(call):
     user_id = call.message.chat.id
     try:
@@ -46,6 +46,11 @@ def calling(call):
                                       "Более подробную информацию о нашей организации и услугах вы найдете на сайте hamroh.org\n\n"
                                       "Данный бот предоставляет площадку для связывания домашнего помощника с клиентом.",
                              reply_markup=hamrohbuttons.main_menu_call_kb())
+        elif call.data == "send_message":
+            bot.delete_message(user_id, call.message.message_id)
+            bot.send_message(user_id, "Введите айди пользователя, которому вы хотите написать",
+                             reply_markup=hamrohbuttons.canceling())
+            bot.register_next_step_handler(call.message, send_answer)
         elif call.data == "main menu":
             bot.delete_message(user_id, call.message.message_id)
             return start_message(call)
@@ -241,6 +246,29 @@ def calling(call):
     except:
         pass
 
+def send_answer(message):
+    admin_id = message.from_user.id
+    if message.text == "Отмена❌":
+        bot.send_message(admin_id, "Действие отменено", reply_markup=types.ReplyKeyboardRemove())
+    else:
+        try:
+            user_id = int(message.text)
+            bot.send_message(admin_id, "Введите сообщения для пользователя", reply_markup=hamrohbuttons.canceling())
+            bot.register_next_step_handler(message, send_full_answer, user_id)
+        except:
+            bot.send_message(admin_id, "Неправильный айди", reply_markup=types.ReplyKeyboardRemove())
+
+def send_full_answer(message, user_id):
+    admin_id = message.from_user.id
+    text = message.text
+    if message.text == "Отмена❌":
+        bot.send_message(admin_id, "Действие отменено", reply_markup=types.ReplyKeyboardRemove())
+    else:
+        try:
+            bot.send_message(user_id, text)
+            bot.send_message(admin_id, "Ответ отправлен", reply_markup=types.ReplyKeyboardRemove())
+        except:
+            bot.send_message(admin_id, "Не удалось отправить ответ", reply_markup=types.ReplyKeyboardRemove())
 
 def send_message_to_user(target_id, text):
     target = target_id[0]
@@ -252,7 +280,6 @@ def send_message_to_user(target_id, text):
 def mailing_to_all(message):
     user_id = message.from_user.id
     targets_id = hamrohdatabase.mailing_all()
-    print(targets_id)
     text = message.text
     if text == "Отмена❌":
         bot.send_message(user_id, "Рассылка отменена", reply_markup=types.ReplyKeyboardRemove())

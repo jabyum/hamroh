@@ -241,10 +241,12 @@ def main_admin_menu():
     add_admin = InlineKeyboardButton(text="Добавить администратора", callback_data="add_admin")
     delete_admin = InlineKeyboardButton(text="Удалить администратора", callback_data="del_admin")
     mailing = InlineKeyboardButton(text="Создать рассылку", callback_data="mailing")
+    msg = InlineKeyboardButton(text="Написать пользователю", callback_data="send_message")
     close = InlineKeyboardButton(text="Закрыть", callback_data="close")
     kb.row(add_admin)
     kb.row(delete_admin)
     kb.row(mailing)
+    kb.row(msg)
     kb.row(close)
     return kb
 def canceling():
