@@ -3,12 +3,12 @@ def main_menu_kb(check_nurse):
     kb = InlineKeyboardMarkup(row_width=1)
     about = InlineKeyboardButton(text="О проекте", callback_data="about")
     language = InlineKeyboardButton(text="Сменить язык", callback_data="change_language")
-    vacancie = InlineKeyboardButton(text="Мне нужен домашний помощник", callback_data="vacancy")
+    vacancy = InlineKeyboardButton(text="Мне нужен домашний помощник", callback_data="vacancy")
     vac_base = InlineKeyboardButton(text="Посмотреть актуальные вакансии", callback_data="vac_base")
     registration = InlineKeyboardButton(text="Хочу быть в вашей базе помощников", callback_data="registration")
     delete_registration = InlineKeyboardButton(text="Удалить свою анкету", callback_data="delete_registration")
     question = InlineKeyboardButton(text="Задать вопрос", callback_data="question")
-    kb.row(vacancie)
+    kb.row(vacancy)
     if check_nurse == False:
         kb.add(registration)
     elif check_nurse == True:
@@ -97,7 +97,7 @@ def schedule_button_kb():
 def extrawork_button_kb():
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
     yes = KeyboardButton("Да, нуждаюсь")
-    no = KeyboardButton("Нет, нужен только уход за человеком с деменцией")
+    no = KeyboardButton("Нет, нужен только уход за человеком")
     mm = InlineKeyboardButton(text="Главное меню")
     kb.add(yes, no, mm)
     return kb
@@ -212,7 +212,7 @@ def schedule_button_kb_uz():
 def extrawork_button_kb_uz():
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
     yes = KeyboardButton("Ҳа, керак")
-    no = KeyboardButton("Йўқ, фақат деменцияли одам учун парвариш керак")
+    no = KeyboardButton("Йўқ, фақат парвариш керак")
     mm = InlineKeyboardButton(text="Бош меню")
     kb.add(yes, no, mm)
     return kb

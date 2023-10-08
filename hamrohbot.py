@@ -6,10 +6,10 @@ import time
 import threading
 bot = telebot.TeleBot("6527744179:AAGCZ0BFwA6VXkqZ5BVDtetE4NtfL7wg7XQ")
 
+
 @bot.message_handler(commands=["start"])
 def start_message(message):
     user_id = message.from_user.id
-
     language = hamrohdatabase.check_language(user_id)
     if language == False:
         bot.send_message(user_id, "Выберите язык / Tilni tanlang", reply_markup=hamrohbuttons.language_kb())
@@ -121,12 +121,12 @@ def calling(call):
         elif call.data == "vac_base":
             bot.delete_message(user_id, call.message.message_id)
             bot.send_message(user_id, "Канал с актуальными вакансиями\n"
-                                      "https://t.me/+_iYh4_uI7YhiNjJi",
+                                      "https://t.me/hamrohcare_vacancy",
                              reply_markup=hamrohbuttons.main_menu_call_kb())
         elif call.data == "nurse_base":
             bot.delete_message(user_id, call.message.message_id)
             bot.send_message(user_id, "Канал с анкетами сиделок\n"
-                                      "https://t.me/+8BN_TP1AX8Y4ZjIy",
+                                      "https://t.me/hamrohcare_nurse",
                              reply_markup=hamrohbuttons.main_menu_call_kb())
         elif call.data == "take_vacancy":
             bot.delete_message(user_id, call.message.message_id)
@@ -146,6 +146,7 @@ def calling(call):
             bot.delete_message(user_id, call.message.message_id)
             return start_message(call)
         elif call.data == "delete_registration_uz":
+            bot.delete_message(user_id, call.message.message_id)
             bot.send_message(user_id, "Анкетангизни ўчиришни аниқ хоҳлайсизми?",
                              reply_markup=hamrohbuttons.delete_registration_kb_uz())
         elif call.data == "no_delete_uz":
@@ -448,7 +449,8 @@ def get_vac_phone_number(message, sex, age, disease, severity, schedule, extra_w
     if message.contact:
         phone_number = message.contact.phone_number
         bot.send_message(user_id, "Напишите ниже адрес, включая название района и возможные ориентиры." 
-                                  "(не отправляйте геолокацию)", reply_markup=hamrohbuttons.main_menu_reply_kb())
+                                  "(не отправляйте геолокацию).\n Также вы можете написать любую важную по вашему мнению "
+                                  "информацию", reply_markup=hamrohbuttons.main_menu_reply_kb())
         bot.register_next_step_handler(message, get_vac_address, sex, age, disease, severity, schedule, extra_work,
                                        period, phone_number)
     elif message.text == "Главное меню":
@@ -482,7 +484,7 @@ def get_vac_salary(message, sex, age, disease, severity, schedule, extra_work, p
                                                    f"<b>Рабочий день</b>: {schedule}\n"
                                                    f"<b>Дополнительная работа</b>: {extra_work}\n"
                                                    f"<b>Период работы</b>: {period}\n"
-                                                   f"<b>Адрес</b>: {address}\n"
+                                                   f"<b>Адрес и дополнительная информация</b>: {address}\n"
                                                    f"<b>Оплата</b>: {salary}\n"
                                                    f"<b>Телефон</b>: {phone_number}", parse_mode="html")
         message_id = posting.message_id
@@ -542,7 +544,8 @@ def get_nurse_experience(message, name, sex, age, education):
     if experience == "Главное меню":
         start_message(message)
     else:
-        bot.send_message(user_id, "Напишите о навыках, которыми вы обладаете, которые могут помочь при уходе на дому.",
+        bot.send_message(user_id, "Напишите о навыках, которыми вы обладаете, которые могут помочь при уходе на дому."
+                                  "Также вы можете написать любую важную по вашему мнению информацию",
                          reply_markup=hamrohbuttons.main_menu_reply_kb())
         bot.register_next_step_handler(message, get_nurse_skills, name, sex, age, education, experience)
 def get_nurse_skills(message, name, sex, age, education, experience):
@@ -590,7 +593,7 @@ def get_nurse_photo(message,name, sex, age, education, experience, skills, addre
                                                                       f"<b>Возраст</b>: {age}\n"
                                                                       f"<b>Образование</b>: {education}\n"
                                                                       f"<b>Опыт</b>: {experience}\n"
-                                                                      f"<b>Навыки</b>: {skills}\n"
+                                                                      f"<b>Навыки и дополнительная информация</b>: {skills}\n"
                                                                       f"<b>Адрес</b>: {address}\n"
                                                                       f"<b>Номер телефона</b>: {phone_number}",
                                  parse_mode="html")
@@ -682,7 +685,7 @@ def get_vac_phone_number_uz(message, sex, age, disease, severity, schedule, extr
     if message.contact:
         phone_number = message.contact.phone_number
         bot.send_message(user_id, "Қуйида манзил, хусусан туман номи ва яқин мўлжални ёзинг." 
-                                  "(геолокация жўнатманг)", reply_markup=hamrohbuttons.main_menu_reply_kb_uz())
+                                  "(геолокация жўнатманг). Ҳамда Сиз муҳим деб топган ҳар қандай маълумотни қолдиришингиз мумкин", reply_markup=hamrohbuttons.main_menu_reply_kb_uz())
         bot.register_next_step_handler(message, get_vac_address_uz, sex, age, disease, severity, schedule, extra_work,
                                        period, phone_number)
     elif message.text == "Бош меню":
@@ -715,7 +718,7 @@ def get_vac_salary_uz(message, sex, age, disease, severity, schedule, extra_work
                                                    f"<b>Иш куни</b>: {schedule}\n"
                                                    f"<b>Қўшимча иш</b>: {extra_work}\n"
                                                    f"<b>Иш даври</b>: {period}\n"
-                                                   f"<b>Манзил</b>: {address}\n"
+                                                   f"<b>Манзил ва қўшимча маълумот</b>: {address}\n"
                                                    f"<b>Тўлов</b>: {salary}\n"
                                                    f"<b>Телефон</b>: {phone_number}", parse_mode="html")
         message_id = posting.message_id
@@ -774,7 +777,7 @@ def get_nurse_experience_uz(message, name, sex, age, education):
     if experience == "Бош меню":
         start_message(message)
     else:
-        bot.send_message(user_id, "Уйдаги парваришда ёрдам бериши мумкин бўлган кўникмаларингиз ҳақида ёзинг.",
+        bot.send_message(user_id, "Уйдаги парваришда ёрдам бериши мумкин бўлган кўникмаларингиз ҳақида ёзинг.Ҳамда Сиз муҳим деб топган ҳар қандай маълумотни қолдиришингиз мумкин",
                          reply_markup=hamrohbuttons.main_menu_reply_kb_uz())
         bot.register_next_step_handler(message, get_nurse_skills_uz, name, sex, age, education, experience)
 def get_nurse_skills_uz(message, name, sex, age, education, experience):
@@ -822,7 +825,7 @@ def get_nurse_photo_uz(message,name, sex, age, education, experience, skills, ad
                                                                       f"<b>Ёш</b>: {age}\n"
                                                                       f"<b>Маълумот</b>: {education}\n"
                                                                       f"<b>Иш тажрибаси</b>: {experience}\n"
-                                                                      f"<b>Кўникмалар</b>: {skills}\n"
+                                                                      f"<b>Кўникмалар ва қўшимча маълумот</b>: {skills}\n"
                                                                       f"<b>Манзил</b>: {address}\n"
                                                                       f"<b>Телефон рақами</b>: {phone_number}",
                                  parse_mode="html")
