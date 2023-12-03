@@ -4,7 +4,7 @@ import hamrohbuttons
 from telebot import types
 import time
 import threading
-bot = telebot.TeleBot("5980180409:AAH2d-S8aAibCCA2TajWyQvxMqIUsl4M_F8")
+bot = telebot.TeleBot("")
 
 
 @bot.message_handler(commands=["start"])
